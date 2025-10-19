@@ -1,4 +1,4 @@
-name: Build Padavan
+name: Build Padavan K2P
 
 on:
   push:
@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -22,47 +22,18 @@ jobs:
           gettext libncurses5-dev python3-docutils zlib1g-dev \
           libssl-dev tar curl
 
-    - name: Clone Padavan Source
+    - name: Clone Padavan source code
       run: |
         if [ ! -d /opt/rt-n56u ]; then
           sudo mkdir -p /opt/rt-n56u
           sudo chown $USER:$USER /opt/rt-n56u
-          git clone https://github.com/hanwckf/rt-n56u.git /opt/rt-n56u
+          git clone https://github.com/chongshengB/rt-n56u.git /opt/rt-n56u
         fi
 
-    - name: Fix Toolchain and Go
+    - name: Download toolchain
       run: |
         cd /opt/rt-n56u/trunk/tools
         mkdir -p go
+        # 下载 Go 1.15.2
         if [ ! -f go/go1.15.2.linux-amd64.tar.gz ]; then
-          echo "Downloading Go toolchain..."
-          wget -t5 --timeout=30 -O go/go1.15.2.linux-amd64.tar.gz \
-            https://golang.org/dl/go1.15.2.linux-amd64.tar.gz
-        fi
-        echo "Extracting Go..."
-        tar -zxf go/go1.15.2.linux-amd64.tar.gz -C go || true
-
-    - name: Fix htop Source Link
-      run: |
-        cd /opt/rt-n56u/trunk/user/htop
-        rm -f htop-3.0.2.tar.gz
-        echo "Downloading htop from GitHub..."
-        wget -O htop-3.0.2.tar.gz https://github.com/htop-dev/htop/archive/refs/tags/3.0.2.tar.gz
-
-    - name: Build Toolchain
-      run: |
-        cd /opt/rt-n56u/trunk
-        make tools
-
-    - name: Build Firmware
-      run: |
-        cd /opt/rt-n56u/trunk
-        # 修改为你的 config 路径，比如 configs/templates/PSG1218.config
-        cp configs/templates/PSG1218.config .config
-        fakeroot make
-
-    - name: Upload Firmware
-      uses: actions/upload-artifact@v4
-      with:
-        name: firmware
-        path: /opt/rt-n56u/trunk/images/
+          wget -O go/go1.15.2.linux-amd64.tar.gz https://golang.org/dl/go1.15.2.linux-
